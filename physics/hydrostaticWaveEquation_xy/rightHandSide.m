@@ -1,6 +1,5 @@
 function  RHS = rightHandSide(p, sol)
 
-% -------------------------------------------------------------------------------- 
 % Inputs:
 %	p		: parameters
 %	sol 	: solution
@@ -22,18 +21,43 @@ function  RHS = rightHandSide(p, sol)
 % where {a b} denotes the transform of a*b.
 %
 
+% Key to the solution
+Ah = sol(:, :, 1);
+qh = sol(:, :, 2);
+
 % Get the streamfunction psih from the vorticity qh and set domain mode to zero.
-psih = -sol./p.kay2;
+psih = -qh ./ p.kay2;
 
-% We need dx(psi) and dy(psi). Both are real.
-psix = real(ifft2(1i*p.KK.*psih));
-psiy = real(ifft2(1i*p.LL.*psih));
+U = -real(ifft2(1i*p.LL.*psih));
+V =  real(ifft2(1i*p.KK.*psih));
+q = real(ifft2(qh));
 
-% Get vorticity q in real space.  Recall that q is real.
-q = real(ifft2(sol));
+Ax = -ifft2(1i*p.KK.*Ah);
+Ay = -ifft2(1i*p.LL.*Ah);
+EA = -p.alpha/2*ifft2( Ah ...
+        .*(p.KK.^2+p.LL.^2 + p.kappa^2*(4+3*p.alpha)) );
+Axx = -ifft2(p.KK.^2.*Ah);
+Ayy = -ifft2(p.LL.^2.*Ah);
+Axy = -ifft2(p.KK.*p.LL.*Ah);
 
-% Assemble RHS.q. Using J(psi,q) = dy(q psi_x) - dx(q psi_y)
-RHS = 1i*p.KK.*fft2(psiy.*q) - 1i*p.LL.*fft2(psix.*q);
+% Construct RHS for A in parts:
+% 1. Advection
+RHS(:, :, 1) = -p.invE.*(1i*p.KK.*fft2(U.*EA) + 1i*p.LL.*fft2(V.*EA));
+
+% 2. Refraction
+RHS(:, :, 1) = RHS(:, :, 1) - ...
+    p.invE/p.f0.*(  1i*p.KK.*fft2( (1i*p.sigma*Ax - p.f0*Ay).*q ) ...
+                  + 1i*p.LL.*fft2( (1i*p.sigma*Ay + p.f0*Ax).*q ) );
+
+% 3. Middling Jacobian terms
+RHS(:, :, 1) = RHS(:, :, 1) - 2*p.invE*p.sigma/p.f0^2 ... 
+   .* ( p.KK.*fft2(  V.*( 1i*p.sigma*Axy - p.f0*Ayy ) ...
+                   - U.*( 1i*p.sigma*Ayy + p.f0*Axy ) ) ...
+      - p.LL.*fft2(  V.*( 1i*p.sigma*Axx - p.f0*Axy ) ...
+                   - U.*( 1i*p.sigma*Axy + p.f0*Axx ) ) ); 
+
+% q	
+RHS(:, :, 2) = -1i*p.KK.*fft2(U.*q) - 1i*p.LL.*fft2(V.*q);
 
 % Dealias 
 RHS = p.filt.*RHS;

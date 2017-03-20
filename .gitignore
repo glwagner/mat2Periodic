@@ -1,3 +1,4 @@
 *.swp
 examples/*/data
+examples/*/code
 projects
