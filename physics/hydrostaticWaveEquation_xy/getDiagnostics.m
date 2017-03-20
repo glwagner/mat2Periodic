@@ -33,6 +33,12 @@ function diags = getDiagnostics(p, sol)
     diags.dmKE.value = diags.mKE.value / KE0;
 
 
+    diags.maxRo.name = 'Maximum Rossby number';
+    diags.maxRo.units = [];
+    diags.maxRo.print = 1;
+
+    diags.maxRo.value = max(max(abs(real(ifft2(qh))/p.f0)));
+
     diags.A.name = 'Wave action';
     diags.A.units = 'm^2/s^2';
     diags.A.print = 0;
@@ -57,7 +63,7 @@ function diags = getDiagnostics(p, sol)
 
     diags.dwE.name = 'Change in wave energy';
     diags.dwE.units = [];
-    diags.dwE.print = 1;
+    diags.dwE.print = 0;
 
     wE0 = 1/(p.nx*p.ny) * sum(sum( ...
                         (p.alpha+2)/p.alpha^2 ...
@@ -66,8 +72,6 @@ function diags = getDiagnostics(p, sol)
                                             ));
 
     diags.dwE.value = diags.wE.value / wE0;
-
-
 
 
     diags.dA.name = 'Change in wave action';

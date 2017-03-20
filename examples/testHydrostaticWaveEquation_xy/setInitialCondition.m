@@ -4,7 +4,7 @@ function sol = setInitialCondition(p)
     sol0 = zeros(p.ny, p.nx, p.nVars);
 
     % Initial condition
-    sol0 = gaussianVortex(p, sol0, p.Lx/20, 0.1);
+    sol0 = gaussianVortex(p, sol0, p.Lx/20, 0.05);
     sol0 = planeWave(p, sol0);
     
     % Transform into spectral space.

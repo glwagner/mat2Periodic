@@ -32,29 +32,33 @@ U = -real(ifft2(1i*p.LL.*psih));
 V =  real(ifft2(1i*p.KK.*psih));
 q = real(ifft2(qh));
 
-Ax = -ifft2(1i*p.KK.*Ah);
-Ay = -ifft2(1i*p.LL.*Ah);
-EA = -p.alpha/2*ifft2( Ah ...
-        .*(p.KK.^2+p.LL.^2 + p.kappa^2*(4+3*p.alpha)) );
+Ax = ifft2(1i*p.KK.*Ah);
+Ay = ifft2(1i*p.LL.*Ah);
+EA = -p.alpha/2*ifft2(( p.KK.^2+p.LL.^2 + p.kappa^2*(4+3*p.alpha) ).*Ah );
+        
 Axx = -ifft2(p.KK.^2.*Ah);
 Ayy = -ifft2(p.LL.^2.*Ah);
 Axy = -ifft2(p.KK.*p.LL.*Ah);
 
-% Construct RHS for A in parts:
+% Construct RHS.
+RHS = zeros(p.ny, p.nx, p.nVars);
+
+% For A in parts:
 % 1. Advection
-RHS(:, :, 1) = -p.invE.*(1i*p.KK.*fft2(U.*EA) + 1i*p.LL.*fft2(V.*EA));
+RHS(:, :, 1) = RHS(:, :, 1) ...
+    -p.invE.*( 1i*p.KK.*fft2(U.*EA) + 1i*p.LL.*fft2(V.*EA) );
 
 % 2. Refraction
-RHS(:, :, 1) = RHS(:, :, 1) - ...
-    p.invE/p.f0.*(  1i*p.KK.*fft2( (1i*p.sigma*Ax - p.f0*Ay).*q ) ...
-                  + 1i*p.LL.*fft2( (1i*p.sigma*Ay + p.f0*Ax).*q ) );
+RHS(:, :, 1) = RHS(:, :, 1) ...
+    -p.invE/p.f0.*(  1i*p.KK.*fft2( (1i*p.sigma*Ax - p.f0*Ay).*q ) ...
+                   + 1i*p.LL.*fft2( (1i*p.sigma*Ay + p.f0*Ax).*q ) );
 
 % 3. Middling Jacobian terms
-RHS(:, :, 1) = RHS(:, :, 1) - 2*p.invE*p.sigma/p.f0^2 ... 
-   .* ( p.KK.*fft2(  V.*( 1i*p.sigma*Axy - p.f0*Ayy ) ...
-                   - U.*( 1i*p.sigma*Ayy + p.f0*Axy ) ) ...
-      - p.LL.*fft2(  V.*( 1i*p.sigma*Axx - p.f0*Axy ) ...
-                   - U.*( 1i*p.sigma*Axy + p.f0*Axx ) ) ); 
+RHS(:, :, 1) = RHS(:, :, 1) + 2i*p.invE*p.sigma/p.f0^2 .* ( ... 
+    1i*p.KK.*fft2(  V.*( 1i*p.sigma*Axy - p.f0*Ayy ) ...
+                  - U.*( 1i*p.sigma*Ayy + p.f0*Axy ) ) ...
+  - 1i*p.LL.*fft2(  V.*( 1i*p.sigma*Axx - p.f0*Axy ) ...
+                  - U.*( 1i*p.sigma*Axy + p.f0*Axx ) ) ); 
 
 % q	
 RHS(:, :, 2) = -1i*p.KK.*fft2(U.*q) - 1i*p.LL.*fft2(V.*q);
