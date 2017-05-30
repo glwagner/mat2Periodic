@@ -34,7 +34,7 @@ q = real(ifft2(qh));
 
 Ax = ifft2(1i*p.KK.*Ah);
 Ay = ifft2(1i*p.LL.*Ah);
-EA = -p.alpha/2*ifft2(( p.KK.^2+p.LL.^2 + p.kappa^2*(4+3*p.alpha) ).*Ah );
+EA = -p.alpha/2 * ifft2(( p.KK.^2+p.LL.^2 + p.kappa^2*(4+3*p.alpha) ).*Ah );
         
 Axx = -ifft2(p.KK.^2.*Ah);
 Ayy = -ifft2(p.LL.^2.*Ah);

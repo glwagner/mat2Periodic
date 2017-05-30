@@ -1,10 +1,10 @@
 clear all
 
-p.home = '/Users/glwagner/Numerics/mat2Periodic';
+p.home = [ pwd '/../..'];
 p.physics = 'hydrostaticWaveEquation_xy';
-p.name = 'testHydrostaticWaveEquation_xy';
+p.name = 'anOceanicScenario';
 
-p.nx = 128;
+p.nx = 384;
 p.Lx = 1e6;
 p.nSteps = 1e3;
 
@@ -14,18 +14,19 @@ p.alpha = 3;
 p.sigma = sqrt(1+p.alpha)*p.f0;
 % Recall that k = sqrt(alpha)*kappa
 p.kappa = (32*pi/p.Lx) / sqrt(p.alpha);
+%p.kappa = pi*p.f0/(2e-3*4e3);
 
-p.nuQ = 1e6;
-p.nuA = 1e2;
+p.nuQ = 1e8;
+p.nuA = 1e4;
 p.nuNQ = 4;
 p.nuNA = 4;
 
-p.dt = 5e-2 * (2*pi/p.sigma);
+p.dt = 1e-2 * (2*pi/p.sigma);
 
 % Step-interval between display.
-p.dnPrint = 2e2;
+p.dnPrint = 1e2;
 p.dnPlot = p.dnPrint;
-p.dnSave = p.dnPrint;
+p.dnSave = 1e2;
 
 %p.timeStepper = 'RK4';
 p.timeStepper = 'ETDRK4';
@@ -43,15 +44,14 @@ if ~exist(codeDir), mkdir(codeDir)
 else eval(sprintf('!rm %s/*', codeDir))
 end
 
-addpath(codeDir)
-
 % Copy code and mat-files into code directory
 eval(sprintf('!cp %s/*.m %s/', sourceDir, codeDir)) 
 eval(sprintf('!cp %s/*.m %s/', physicsDir, codeDir)) 
 eval(sprintf('!cp %s/*.m* %s/', pwd, codeDir)) 
 
+addpath(codeDir)
+
 % Initialize and run the model
-ls
 [p, sol] = initializeModel(p);
 [p, sol] = runSpectralModel(p, sol, p.nSteps);
 
