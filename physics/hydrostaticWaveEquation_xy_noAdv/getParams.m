@@ -1,7 +1,8 @@
 function p = getParams(p)
 
-    % Two-dimensional turbulence
-    p.nVars = 1;
+    % Linearized Boussinesq equations
+    p.nVars = 2;
+    p.alpha = p.sigma^2/p.f0^2 - 1;
 
     % Domain wave number
     k1 = 2*pi/p.Lx;
@@ -27,6 +28,9 @@ function p = getParams(p)
     p.kay2 = p.KK.^2 + p.LL.^2;
     p.kay2(1, 1) = Inf;
 
+    E = -p.alpha/2*( p.KK.^2+p.LL.^2 + p.kappa^2*(4+3*p.alpha) );
+    p.invE = 1./E;
+
     % Zero out high wavenumbers
     p.filt  = zeros(p.ny, p.nx);
 
@@ -34,5 +38,7 @@ function p = getParams(p)
     kkc = 0.65*max(abs(p.kk));
     llc = 0.65*max(abs(p.ll));
     p.filt( (p.KK/kkc).^2 + (p.LL/llc).^2 < 1 ) = 1;
+
+    p.filt = p.filt(:, :, ones(1, p.nVars));
 
 end

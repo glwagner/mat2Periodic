@@ -35,4 +35,12 @@ function p = getParams(p)
     llc = 0.65*max(abs(p.ll));
     p.filt( (p.KK/kkc).^2 + (p.LL/llc).^2 < 1 ) = 1;
 
+    % Dummy variables
+    p.iK    = 1i*p.KK;
+    p.iL    = 1i*p.LL;
+    p.psih  = zeros(p.ny, p.nx);
+    p.psix  = zeros(p.ny, p.nx);
+    p.psiy  = zeros(p.ny, p.nx);
+    p.q     = zeros(p.ny, p.nx);
+
 end

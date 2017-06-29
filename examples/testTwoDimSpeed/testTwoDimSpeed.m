@@ -1,6 +1,6 @@
 clear all
 
-p.physics       = 'twoDimensionalTurbulence';
+p.physics       = 'twoDimensionalTurbulence_slow';
 p.dt            = 1e-1;
 p.Lx            = 2*pi;    
 p.nu            = 1e-4;

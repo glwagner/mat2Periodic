@@ -7,6 +7,7 @@ function [p, sol] = initializeModel(p)
 
     % Set initial condition.
     sol = setInitialCondition(p); 
+    p.sol0 = sol;
 
     % Initialze linear left hand side.
     p.mu = linearLeftHandSide(p, p.KK, p.LL);

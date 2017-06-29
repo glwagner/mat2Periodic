@@ -8,13 +8,13 @@ function [p, sol] = runSpectralModel(p, sol, nSteps)
     if ~exist('p.t'), p.t = 0; end
 
     % Initialize saving 
-    if p.dnSave ~= 0 && ~exist(p.saveCount)
+    if p.dnSave ~= 0 && ~exist('p.saveCount')
         p.saveCount = 0;
-        p.saveDir = fprintf('%s/data', pwd);
+        p.saveDir = sprintf('%s/data', pwd);
 
-        if saveDir ~= 7, mkdir(p.saveDir), end
+        if p.saveDir ~= 7, mkdir(p.saveDir), end
 
-        saveModelState(p, sol)
+        saveModelState(p, sol, p.saveDir, p.saveCount)
     end
 
     % Loop over time-steps.
@@ -43,7 +43,7 @@ function [p, sol] = runSpectralModel(p, sol, nSteps)
         % Save
         if mod(p.iit, p.dnSave) == 0 
             p.saveCount = p.saveCount + 1;
-            saveModelState(p.saveDir, p.saveCount)
+            saveModelState(p, sol, p.saveDir, p.saveCount)
         end
 
     end
@@ -52,8 +52,8 @@ end
 function writeMessage(p, diags)
 
     % Base message
-    msg = sprintf('ii = %05d, t = %06.2f s, tComp = %0.2f s', ...
-                    p.iit, p.t, toc(p.tc));
+    msg = sprintf('ii = %05d, tComp = %0.2f s', ...
+                    p.iit, toc(p.tc));
 
     % Put diagnostics into print string 
     if ~isempty(diags)
@@ -63,14 +63,16 @@ function writeMessage(p, diags)
         for ii = 1:length(diagNames)
             if diags.(diagNames{ii}).print
                 if ii < length(diagNames)
-                    newMsg = sprintf(' %s = %0.3e %s,',diagNames{ii}, ...
+                    newMsg = sprintf(' %s = %0.2e %s,',diagNames{ii}, ...
                                         diags.(diagNames{ii}).value, ...
                                         diags.(diagNames{ii}).units );
                 else
-                    newMsg = sprintf(' %s = %0.3e %s',diagNames{ii}, ...
+                    newMsg = sprintf(' %s = %0.2e %s',diagNames{ii}, ...
                                         diags.(diagNames{ii}).value, ...
                                         diags.(diagNames{ii}).units );
                 end
+            else
+                newMsg = [];
             end
             % Add diagnostic to message
             msg = strcat(msg, newMsg);
@@ -80,7 +82,7 @@ function writeMessage(p, diags)
     fprintf('%s\n', msg)
 end
 
-function saveModelState(p, sol)
-    saveName = fprintf('%s/p.name_%05d.mat', p.saveDir, p.saveCount);
+function saveModelState(p, sol, saveDir, saveCount)
+    saveName = sprintf('%s/%s_%05d.mat', saveDir, p.name, saveCount);
     save(saveName, 'sol', 'p');
 end

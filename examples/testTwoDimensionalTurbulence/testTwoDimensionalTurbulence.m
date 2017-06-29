@@ -2,17 +2,17 @@ clear all
 
 p.physics = 'twoDimensionalTurbulence';
 p.dt = 1e-1;
-p.nx = 384;     
+p.nx = 256;     
 p.Lx = 2*pi;    
-p.nSteps = 1e3;
+p.nSteps = 2e2;
 
 % Viscosity and viscous order
 p.nu = 1e-4;
 p.nuN = 2;
 
 % Step-interval between display.
-p.dnPrint = 1e2;
-p.dnPlot = p.dnPrint;
+p.dnPrint = 0;
+p.dnPlot = 0; %p.dnPrint;
 p.dnSave = 0;
 
 p.timeStepper = 'RK4';
@@ -39,7 +39,9 @@ eval(sprintf('!cp %s/*.m* %s/', pwd, codeDir))
 [p, sol] = initializeModel(p);
 
 % Run the model
+t1 = tic;
 [p, sol] = runSpectralModel(p, sol, p.nSteps);
+toc(t1)
 
 % Plot solution at the end.
 quickPlot(p, sol);

@@ -1,9 +1,9 @@
 function sol = setInitialCondition(p)
 
     % Initial condition
-    [sol0, icType] = randomCosines(p);
+    %[sol0, icType] = randomCosines(p);
     %[sol0, icType] = randomNumbers(p);
-    %[sol0, icType] = randomEnergySpectrum(p)
+    [sol0, icType] = randomEnergySpectrum(p);
 
     switch icType
         case 'Physical'
@@ -13,8 +13,8 @@ function sol = setInitialCondition(p)
     end
 end
 
-function [sol0, icType] = randomCosines(p)
 
+function [sol0, icType] = randomCosines(p)
     icType = 'Physical';
 
     % Random cosine parameters
@@ -32,39 +32,34 @@ function [sol0, icType] = randomCosines(p)
 
     sol0 = sol0x.*sol0y;
     sol0 = sol0 ./ max(max(sol0));
-
 end
 
 
 function [sol0, icType] = randomNumbers(p)
-
     icType = 'Physical';
 
     % Random numbers
     sol0 = rand(p.ny, p.nx); 
-
 end
 
 function [sol0, icType] = randomEnergySpectrum(p)
-
     icType = 'Physical';
 
     % Non-dimensional isotropic wavenumber
-    k  = sqrt(KK.^2+LL.^2)*p.Lx/(2*pi);
+    k  = sqrt(p.KK.^2+p.LL.^2)*p.Lx/(2*pi);
 
     % Energy spectral with peak at non-dim wavenumber 'kPeak'
     kPeak = 8;
     Ek = k.^4 ./ (1+k/kPeak).^16;
 
     % Initial vorticity
-    qh = sqrt(Ek).*sqrt(KK.^2+LL.^2).*exp(1i*2*pi*rand(p.ny, p.nx));
+    qh = sqrt(Ek).*sqrt(p.KK.^2+p.LL.^2).*exp(1i*2*pi*rand(p.ny, p.nx));
     qh(1, 1) = 0;
 
     % Rescale q0 so rms eddy turnover time is "ep"
     ep = 0.1;
     qrms = sqrt(mean(mean( real(ifft2(qh)).^2 )));
     sol0 = ep*real(ifft2(qh))/qrms;
-
 end
 
 
